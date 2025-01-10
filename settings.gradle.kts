@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name="CanLang"
+rootProject.name="VideoListPlayer"
 include(":app")
