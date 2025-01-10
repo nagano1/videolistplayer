@@ -1,0 +1,34 @@
+<resources>
+
+    <style name="AppTheme.Launcher">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!--
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+-->
+
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+        <item name="customTextViewStyle">@style/scrollbar_shape_style</item>
+    </style>
+
+
+    <style name="scrollbar_shape_style">
+        <item name="android:scrollbarAlwaysDrawVerticalTrack">true</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:fadeScrollbars">false</item>
+        <item name="android:scrollbarSize">6dp</item>
+        <item name="android:scrollbarFadeDuration">20</item>
+        <item name="android:scrollbarDefaultDelayBeforeFade">1000</item>
+        <item name="android:scrollbarThumbVertical">@drawable/thumb</item>
+<!--        <item name="android:scrollbarTrackVertical">@drawable/track</item>-->
+    </style>
+
+</resources>

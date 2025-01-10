@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#3300ff"
+    android:minHeight="100dip"
+    android:minWidth="10000dip"
+    android:orientation="vertical">
+
+
+
+
+    <EditText
+        android:id="@+id/textEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:selectAllOnFocus="true"
+        android:scrollbars="vertical" >
+
+        <requestFocus />
+    </EditText>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/copyButton"
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="コピー" />
+
+
+        <Button
+            android:id="@+id/shareButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="共有" />
+
+        <Button
+            android:id="@+id/searchButtonIn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="検索" />
+
+        <!--         <Button -->
+        <!--             android:id="@+id/ngButtonIn" -->
+        <!--             android:layout_width="fill_parent" -->
+        <!--             android:layout_height="wrap_content" -->
+        <!--             android:layout_weight="1" -->
+        <!--             android:text="NG" /> -->
+
+        <Button
+            android:id="@+id/allSelectIn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="全選択" />
+
+    </LinearLayout>
+
+</LinearLayout>
