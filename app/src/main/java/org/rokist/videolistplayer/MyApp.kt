@@ -5,11 +5,19 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.os.*
+import android.os.Build
+import android.os.Environment
+import android.os.Handler
+import android.util.Log
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
+import java.io.IOException
+import java.net.NetworkInterface
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.*
+import java.util.Arrays
+import java.util.Collections
 
 
 //        typeface = Typeface.createFromAsset(assets, "fonts/myFont.ttf")
@@ -18,36 +26,7 @@ class MyApp : Application() {
 
     private var isMyDevice: Boolean = false
 
-    private fun checkMyDevice() {
-        val list = ArrayList<ByteArray>()
-
-        // docomo/zaku/sapphire/sapphire:1.6/DRD08/16431:user/ota-rel-keys,release-keys
-        list.add(
-            byteArrayOf(
-                -77, 20, -16, 44, -101, 107, 106, 62, -45, 115,
-                108, -28, -118, 84, -8, 73, 69, 90, 63, 98, -14, -10, 5, -107,
-                103, 54, -46, -60, -7, 91, 76, 94
-            )
-        )
-
-        val md: MessageDigest
-        try {
-            md = MessageDigest.getInstance("SHA-256")
-            md.update(Build.FINGERPRINT.toByteArray())
-            val hash = md.digest()
-            for (target in list) {
-                if (Arrays.equals(hash, target)) {
-                    isMyDevice = true
-                    break
-                }
-            }
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-        }
-    }
-
     init {
-        checkMyDevice()
         //Instance = this
         // setDirs();
 
@@ -56,6 +35,7 @@ class MyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        isMyDevice = this.getString(R.string.deggvalue) == "AJOPFVOIOFIWE_";
     }
 
 }

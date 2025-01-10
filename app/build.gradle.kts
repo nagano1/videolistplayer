@@ -80,14 +80,16 @@ android {
     }
 
     buildTypes {
-//        debug {
+        debug {
+            resValue("string", "deggvalue", "AJOPFVOIOFIWE_")
 //            isMinifyEnabled = true
 //            proguardFiles(
 //                getDefaultProguardFile("proguard-android-optimize.txt"),
 //                "proguard-rules.pro"
 //            )
-//        }
+        }
         release {
+            resValue("string", "deggvalue", "1")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
