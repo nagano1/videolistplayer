@@ -135,18 +135,6 @@ dependencies {
     implementation(libs.androidx.work.runtime) // (Java only)
     implementation(libs.androidx.work.runtime.ktx) // Kotlin + coroutines
 
-//    // optional - RxJava2 support
-//    implementation("androidx.work:work-rxjava2:$workVersion")
-//
-//    // optional - GCMNetworkManager support
-//    implementation("androidx.work:work-gcm:$workVersion")
-//
-//    // optional - Test helpers
-//    androidTestImplementation("androidx.work:work-testing:$workVersion")
-//
-//    // optional - Multiprocess support
-//    implementation ("androidx.work:work-multiprocess:$workVersion")
-
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
@@ -156,34 +144,9 @@ dependencies {
 
     //implementation "androidx.work:work-runtime:$work_version"
 
-    // https://github-api.kohsuke.org/apidocs/org/kohsuke/github/GHBranch.html
-    // https://mvnrepository.com/artifact/org.kohsuke/github-api
-    implementation(libs.github.api)
-
 
     implementation(libs.fuel.json)
     implementation(libs.fuel)
-
-    // https://projects.eclipse.org/projects/technology.jgit/releases/6.2.0
-    // https://bugs.eclipse.org/bugs/buglist.cgi?bug_status=__open__&product=JGit
-
-    // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/5.7.0.202003110725-r
-    //implementation 'org.eclipse.jgit:org.eclipse.jgit:3.7.1.201504261725-r'
-    //implementation 'org.eclipse.jgit:org.eclipse.jgit:4.0.3.201509231615-r'
-    //implementation 'org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r'
-    //implementation 'org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r'
-
-    //implementation 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
-    //implementation("org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r")
-    implementation(libs.org.eclipse.jgit)
-
-
-    // jgit dependencies
-    //implementation 'org.slf4j:slf4j-api:1.7.24'
-    //implementation 'com.googlecode.javaewah:JavaEWAH:1.1.7'
-
-//    implementation 'com.jcraft:jsch:0.1.50'
-//    implementation 'org.apache.httpcomponents:httpclient:4.1.3'
 
 
     implementation(libs.androidx.appcompat)

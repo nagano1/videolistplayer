@@ -25,10 +25,7 @@ import androidx.core.view.*
 import androidx.documentfile.provider.DocumentFile
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
-import org.eclipse.jgit.api.errors.CannotDeleteCurrentBranchException
 import org.rokist.videolistplayer.databinding.ActivityMainBinding
-import org.rokist.videolistplayer.models.CodeDocument
-import org.rokist.videolistplayer.models.CodingOperationResult
 import org.rokist.videolistplayer.views.MainWindow
 import java.lang.Thread.sleep
 
@@ -185,9 +182,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-    }
 
-    var ex = CannotDeleteCurrentBranchException("message")
+        var d = this.getString(R.string.deggvalue)
+
+    }
 
     var a = 23423
 
@@ -276,8 +274,6 @@ class MainActivity : AppCompatActivity() {
         // 35662aea7f6f50e9 for  SH-M08
         // 53dda112bc6a6ee4 for SH-M15
 
-
-        this.ex = CannotDeleteCurrentBranchException("message2")
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
 
@@ -486,19 +482,6 @@ class MainActivity : AppCompatActivity() {
     private fun AppCompatActivity.setStatusBarColor(color: Int) {
         window.statusBarColor = color
     }
-
-
-    // A native method that is implemented by the 'native-lib' native library,
-    // which is packaged with this application.
-    external fun stringFromJNI(): String
-
-    external fun donothing(): Long
-    external fun stringFromJNI2(l: Long): Long
-
-    external fun createDocument(bytes: ByteArray, count: Long): CodeDocument
-    external fun performCodingOperation(op: Int): CodingOperationResult
-
-    external fun doWithText(str: String): Long
 
 
     companion object {

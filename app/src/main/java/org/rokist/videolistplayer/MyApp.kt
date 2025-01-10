@@ -20,8 +20,6 @@ import java.util.Arrays
 import java.util.Collections
 
 
-//        typeface = Typeface.createFromAsset(assets, "fonts/myFont.ttf")
-
 class MyApp : Application() {
 
     private var isMyDevice: Boolean = false
