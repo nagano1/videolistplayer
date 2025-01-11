@@ -36,6 +36,19 @@ class MyApp : Application() {
         isMyDevice = this.getString(R.string.deggvalue) == "AJOPFVOIOFIWE_";
     }
 
+    /*
+         val myAndroidDeviceId =
+            Settings.Secure.getString(
+                applicationContext.contentResolver,
+                Settings.Secure.ANDROID_ID
+            )
+        Log.d("aaa", "print = ${myAndroidDeviceId}")
+        if (myAndroidDeviceId == "35662aea7f6f50e9") {
+        }
+        // 35662aea7f6f50e9 for  SH-M08
+        // 53dda112bc6a6ee4 for SH-M15
+
+     */
 }
 
 class DeviceInfo constructor(private val context:Context) {

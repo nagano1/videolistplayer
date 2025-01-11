@@ -30,60 +30,6 @@ import org.rokist.videolistplayer.views.MainWindow
 import java.lang.Thread.sleep
 
 
-//import javax.inject.Inject
-
-
-// コンパイル時にすべてのロックオブジェクトを
-// 解析できないといけない?
-
-/*
-
-file A: lock default_lock_a
-    per-thread no guard vars:
-    shared vars: a_var1, a_var2
-
-file B: lock default_lock_b
-    per-thread no guard  vars:
-    shared vars: b_var1, b_var2
-
-
-class SampleClass {
-constructor:
-    private
-    lock a {
-        public var avar;
-        private var bvar;
-    }
-
-    lock b {
-        private var avar;
-        private var bvar;
-    }
-
-    private {
-        var  avar;
-        var bvar;
-    }
-
-    init {
-
-    }
-
-    private int a;
-    private int b;
-}
-
-     int a = 54;
-     int c = a;
-     auto g = c * a
-*/
-
-/*
-Obj obj = new Obj();
-parallel-for (0..1000) {
-    obj.method1()
-}
-*/
 
 typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
 
@@ -117,31 +63,10 @@ class MainActivity : AppCompatActivity() {
     private val useFullScreen = true;
     private val hideNavBar = useFullScreen && false // Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
-    fun periodSystem() {
-        if (hideNavBar) {
-            Handler(Looper.myLooper()!!).postDelayed({
-                if (this.hasFocus) {
-                    WindowInsetsControllerCompat(window, binding.framelayout).let { controller ->
-
-                        controller.systemBarsBehavior =
-                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                        //controller.hide(WindowInsetsCompat.Type.navigationBars())
-                        controller.show(WindowInsetsCompat.Type.navigationBars())
-                        controller.hide(WindowInsetsCompat.Type.navigationBars())
-                    }
-                }
-                periodSystem()
-            }, 5000)
-        }
-    }
-
     private var globalIndex = 0
     override fun onResume() {
         super.onResume()
 
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            periodSystem()
-        }
         globalIndex++;
         val thisSessionIndex = globalIndex;
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -263,16 +188,6 @@ class MainActivity : AppCompatActivity() {
             window.isStatusBarContrastEnforced = true
         }
 
-        val myAndroidDeviceId =
-            Settings.Secure.getString(
-                applicationContext.contentResolver,
-                Settings.Secure.ANDROID_ID
-            )
-        Log.d("aaa", "print = ${myAndroidDeviceId}")
-        if (myAndroidDeviceId == "35662aea7f6f50e9") {
-        }
-        // 35662aea7f6f50e9 for  SH-M08
-        // 53dda112bc6a6ee4 for SH-M15
 
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
@@ -312,64 +227,7 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-        //binding.videoView.setVideoURI((Uri.parse("https://youtu.be/meFDtNM2uzY?si=WfRagiNsBKPmR748")));
-        val displayMetrics: DisplayMetrics = this.resources.displayMetrics
 
-        val mDensityDpi = displayMetrics.densityDpi
-        val mDensity = displayMetrics.density
-        val mDisplayWidth = displayMetrics.widthPixels
-        val mDisplayHeight = displayMetrics.heightPixels
-
-        var densityStr = "Unknown"
-        var difference: Int
-        var leastDifference = 9999
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_LOW)
-        if (difference < leastDifference) {
-            leastDifference = difference
-            densityStr = "LOW"
-        }
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_MEDIUM)
-        if (difference < leastDifference) {
-            leastDifference = difference
-            densityStr = "MEDIUM"
-        }
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_HIGH)
-        if (difference < leastDifference) {
-            leastDifference = difference
-            densityStr = "HIGH"
-        }
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_XHIGH)
-        if (difference < leastDifference) {
-            leastDifference = difference
-            densityStr = "XHIGH"
-        }
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_XXHIGH)
-        if (difference < leastDifference) {
-            leastDifference = difference
-            densityStr = "XXHIGH"
-        }
-
-        difference = Math.abs(mDensityDpi - DisplayMetrics.DENSITY_XXXHIGH)
-        if (difference < leastDifference) {
-            densityStr = "XXXHIGH"
-        }
-
-        Log.i(
-            "aaa",
-            java.lang.String.format(
-                "Display [h,w]: [%s,%s] Density: %s Density DPI: %s [%s]",
-                mDisplayHeight,
-                mDisplayWidth,
-                mDensity,
-                mDensityDpi,
-                densityStr
-            )
-        )
 
         val scr = binding.mainStage
         val observer = scr.viewTreeObserver
@@ -386,39 +244,14 @@ class MainActivity : AppCompatActivity() {
         this.setStatusBarColor(Color.argb(55, 0, 0, 11))// Color.TRANSPARENT
         window.navigationBarColor = Color.argb(33, 0, 0, 11)
 
-        this.hideSystemUI()
-        //this.setLightStatusBar()
+        //this.hideSystemUI()
+        this.setLightStatusBar()
     }
 
     private lateinit var loadingView: View
     private var shortAnimationDuration: Int = 31101
 
-/*
-    private fun crossfade() {
-        loadingView = this.toActivity().binding.splashScreen
 
-        val dur = 800L
-
-        val alphaFadeout0 = AlphaAnimation(0.0f, 1.0f)
-        alphaFadeout0.duration = 800
-        alphaFadeout0.fillAfter = true
-        this.binding.centerIcon.startAnimation(alphaFadeout0)
-        binding.centerIcon.alpha = 1F
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            val alphaFadeout = AlphaAnimation(1.0f, 0.0f)
-            alphaFadeout.duration = dur
-            alphaFadeout.fillAfter = true
-            // animationが終わったそのまま表示にする
-
-            loadingView.startAnimation(alphaFadeout)
-            Handler(Looper.getMainLooper()).postDelayed({
-                loadingView.visibility = View.GONE
-
-            }, dur)
-        }, 400)
-    }
-*/
     private fun setLightStatusBar() {
         val wic = WindowInsetsControllerCompat(window, window.decorView)
         wic.isAppearanceLightStatusBars = true
