@@ -156,8 +156,6 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, resultData)
 
         if (requestCode == 31 && resultCode == Activity.RESULT_OK) {
-            // The result data contains a URI for the document or directory that
-            // the user selected.
             resultData?.data?.also { uri ->
 
                 val pickedDir = DocumentFile.fromTreeUri(this, uri)
@@ -168,7 +166,6 @@ class MainActivity : AppCompatActivity() {
                         if (true == fil.uri.path?.endsWith(("mp4"))) {
                             binding.videoView.setVideoURI((fil.uri))
                             binding.videoView.start()
-                            //binding.videoView.curre
                             break;
                         }
 
