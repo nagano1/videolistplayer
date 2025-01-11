@@ -9,16 +9,18 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.media.MediaPlayer
+import android.media.MediaPlayer.MEDIA_INFO_BUFFERING_END
+import android.media.MediaPlayer.OnPreparedListener
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
-import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.widget.VideoView
+import androidx.annotation.IntegerRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
@@ -27,8 +29,6 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import org.rokist.videolistplayer.databinding.ActivityMainBinding
 import org.rokist.videolistplayer.views.MainWindow
-import java.lang.Thread.sleep
-
 
 
 typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
@@ -91,8 +91,17 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
+    var position = 0;
+    var url: Uri? = null;
     override fun onRestart() {
         super.onRestart()
+        if (url != null) {
+            binding.videoView.setVideoURI(url)
+            if (position > 0) {
+                binding.videoView.seekTo(position)
+            }
+            binding.videoView.start()
+        }
     }
 
     override fun onPause() {
@@ -101,8 +110,9 @@ class MainActivity : AppCompatActivity() {
 //            listener(false)
 //        }
 
-        sleep(3000)
-        binding.videoView.start()
+        //sleep(3000)
+        binding.videoView.pause()
+        position = binding.videoView.currentPosition
     }
 
     override fun onStart() {
@@ -165,6 +175,33 @@ class MainActivity : AppCompatActivity() {
                         //fil.stream
                         if (true == fil.uri.path?.endsWith(("mp4"))) {
                             binding.videoView.setVideoURI((fil.uri))
+                            url = fil.uri
+                            binding.videoView.setOnInfoListener { _, what, _ ->
+                                when (what) {
+                                    MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                                        // バッファリング開始時の処理
+                                    }
+                                    MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                                        // バッファリング終了時の処理
+                                    }
+                                }
+                                true
+                            }
+                            binding.videoView.setOnErrorListener() { _, what, _ ->
+                                when (what) {
+                                    MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                                        // バッファリング開始時の処理
+                                    }
+                                    MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                                        // バッファリング終了時の処理
+                                    }
+                                }
+                                true
+                            }
+                            binding.videoView.setOnCompletionListener {
+
+                                val g = 32
+                            }
                             binding.videoView.start()
                             break;
                         }
