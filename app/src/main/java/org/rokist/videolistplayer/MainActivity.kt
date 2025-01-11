@@ -289,7 +289,6 @@ class MainActivity : AppCompatActivity()
 
     private fun hideSystemUI()
     {
-
         if (useFullScreen) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
