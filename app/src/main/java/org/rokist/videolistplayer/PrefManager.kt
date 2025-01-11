@@ -99,25 +99,23 @@ class PrefManager constructor(private var context:Context){
         }
     }
 
-    // 文字列ではなく
+    fun putInt(key: String?, int: Int) {
+        val edit = _sharedPreferences.edit()
+        edit?.putInt(key, 0)
+        edit?.apply()
+    }
+
+    fun putString(key: String?, str: String) {
+        val edit = _sharedPreferences.edit()
+        edit?.putString(key, str)
+        edit?.apply()
+    }
+
+
     fun getBooleanPref(string: String?, b: Boolean): Boolean {
         return _sharedPreferences.getBoolean(string, b)
     }
 
-/*
-        fun a() {
-            val s = SavedFilter()
-            val gson = Gson()
-            var json: String = gson.toJson(s)
-            val appSharedPrefs =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext())
-            val prefsEditor = appSharedPrefs.edit()
-            prefsEditor.putString("MyObject", json)
-            prefsEditor.commit()
-            json = appSharedPrefs.getString("MyObject", "")
-            val savedFilter: SavedFilter = gson.fromJson(json, SavedFilter::class.java)
-        }
-  */
     interface OnPrefChangedListener {
         fun onPrefChanged()
     }

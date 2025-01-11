@@ -45,8 +45,8 @@ class ResumeOrPauseList constructor(val context: Context) {
 }
 
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity()
+{
     private var mainWindow: MainWindow? = null
     lateinit var binding: ActivityMainBinding
 
@@ -64,7 +64,9 @@ class MainActivity : AppCompatActivity() {
     private val hideNavBar = useFullScreen && false // Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
     private var globalIndex = 0
-    override fun onResume() {
+
+    override fun onResume()
+    {
         super.onResume()
 
         globalIndex++;
@@ -78,7 +80,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     var hasFocus = false
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
+    override fun onWindowFocusChanged(hasFocus: Boolean)
+    {
         super.onWindowFocusChanged(hasFocus)
         Log.d("aaa", "focus: ${hasFocus}")
         this.hasFocus = hasFocus
@@ -87,7 +90,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
+    override fun onConfigurationChanged(newConfig: Configuration)
+    {
         super.onConfigurationChanged(newConfig)
     }
 
@@ -104,7 +108,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
+    override fun onPause()
+    {
         super.onPause()
 //        for (listener in resumeOrPauseList.listeners) {
 //            listener(false)
@@ -115,22 +120,22 @@ class MainActivity : AppCompatActivity() {
         position = binding.videoView.currentPosition
     }
 
-    override fun onStart() {
+    override fun onStart()
+    {
         super.onStart()
-
-        var d = this.getString(R.string.deggvalue)
-
     }
 
     var a = 23423
 
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent?)
+    {
         Log.d("aaa", "onNewIntent")
         super.onNewIntent(intent)
     }
 
-    protected fun checkAndRequestRequiredPermissions(permission: String) {
+    protected fun checkAndRequestRequiredPermissions(permission: String)
+    {
         if (ContextCompat.checkSelfPermission(
                 this,
                 permission
@@ -143,8 +148,10 @@ class MainActivity : AppCompatActivity() {
 
     var isLoad = false
 
-    class HttpAccessor {
-        fun a() {
+    class HttpAccessor
+    {
+        fun a()
+        {
             // 非同期処理
             "https://www.casareal.co.jp/".httpGet()
                 .header()
@@ -161,8 +168,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(
-        requestCode: Int, resultCode: Int, resultData: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?)
+    {
         super.onActivityResult(requestCode, resultCode, resultData)
 
         if (requestCode == 31 && resultCode == Activity.RESULT_OK) {
@@ -174,38 +181,9 @@ class MainActivity : AppCompatActivity() {
                     for (fil in a) {
                         //fil.stream
                         if (true == fil.uri.path?.endsWith(("mp4"))) {
-                            binding.videoView.setVideoURI((fil.uri))
-                            url = fil.uri
-                            binding.videoView.setOnInfoListener { _, what, _ ->
-                                when (what) {
-                                    MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
-                                        // バッファリング開始時の処理
-                                    }
-                                    MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
-                                        // バッファリング終了時の処理
-                                    }
-                                }
-                                true
-                            }
-                            binding.videoView.setOnErrorListener() { _, what, _ ->
-                                when (what) {
-                                    MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
-                                        // バッファリング開始時の処理
-                                    }
-                                    MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
-                                        // バッファリング終了時の処理
-                                    }
-                                }
-                                true
-                            }
-                            binding.videoView.setOnCompletionListener {
-
-                                val g = 32
-                            }
-                            binding.videoView.start()
-                            break;
+                            startVideo(fil.uri)
+                            break
                         }
-
                     }
                 }
                 // Perform operations on the document using its URI.
@@ -213,7 +191,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var _prefManager: PrefManager
+
+    private fun savePosition(uri: Uri)
+    {
+        _prefManager.putInt(uri.path!! + "position", binding.videoView.currentPosition)
+    }
+
+    private fun saveVideUri(url: String)
+    {
+        _prefManager.putString("url", url)
+    }
+
+    private fun startVideo(uri: Uri)
+    {
+        binding.videoView.setVideoURI((uri))
+        url = uri
+        saveVideUri(uri.path!!)
+        binding.videoView.start()
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
@@ -222,16 +222,12 @@ class MainActivity : AppCompatActivity() {
             window.isStatusBarContrastEnforced = true
         }
 
-
+        _prefManager = PrefManager(this)
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
 
         setContentView(binding.root)
 
-        val m = MediaPlayer()
-        //m.setDataSource()
-        //m.prepare()
-        //m.start()
         //crossfade()
         binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
             val widthWas = rightWas - leftWas // Right exclusive, left inclusive
@@ -261,8 +257,6 @@ class MainActivity : AppCompatActivity() {
 
         })
 
-
-
         val scr = binding.mainStage
         val observer = scr.viewTreeObserver
         val listener = object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -286,13 +280,15 @@ class MainActivity : AppCompatActivity() {
     private var shortAnimationDuration: Int = 31101
 
 
-    private fun setLightStatusBar() {
+    private fun setLightStatusBar()
+    {
         val wic = WindowInsetsControllerCompat(window, window.decorView)
         wic.isAppearanceLightStatusBars = true
     }
 
 
-    private fun hideSystemUI() {
+    private fun hideSystemUI()
+    {
 
         if (useFullScreen) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -337,7 +333,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showSystemUI() {
+    private fun showSystemUI()
+    {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(
             window,
@@ -346,18 +343,13 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun AppCompatActivity.setStatusBarColor(color: Int) {
+    private fun AppCompatActivity.setStatusBarColor(color: Int)
+    {
         window.statusBarColor = color
     }
 
-
     companion object {
         var abc: Int = 0
-
-        // Used to load the 'native-lib' library on application startup.
-        init {
-            //System.loadLibrary("native-lib")
-        }
     }
 }
 
