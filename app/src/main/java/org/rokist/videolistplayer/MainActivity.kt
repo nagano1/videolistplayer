@@ -8,9 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.media.MediaPlayer
-import android.media.MediaPlayer.MEDIA_INFO_BUFFERING_END
-import android.media.MediaPlayer.OnPreparedListener
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,8 +16,8 @@ import android.os.Looper
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.*
-import android.widget.VideoView
-import androidx.annotation.IntegerRes
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
@@ -28,7 +25,6 @@ import androidx.documentfile.provider.DocumentFile
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import org.rokist.videolistplayer.databinding.ActivityMainBinding
-import org.rokist.videolistplayer.views.MainWindow
 
 
 typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
@@ -47,7 +43,6 @@ class ResumeOrPauseList constructor(val context: Context) {
 
 class MainActivity : AppCompatActivity()
 {
-    private var mainWindow: MainWindow? = null
     lateinit var binding: ActivityMainBinding
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -168,29 +163,6 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?)
-    {
-        super.onActivityResult(requestCode, resultCode, resultData)
-
-        if (requestCode == 31 && resultCode == Activity.RESULT_OK) {
-            resultData?.data?.also { uri ->
-
-                val pickedDir = DocumentFile.fromTreeUri(this, uri)
-                if (pickedDir != null) {
-                    var a: Array<DocumentFile> = pickedDir.listFiles()
-                    for (fil in a) {
-                        //fil.stream
-                        if (true == fil.uri.path?.endsWith(("mp4"))) {
-                            startVideo(fil.uri)
-                            break
-                        }
-                    }
-                }
-                // Perform operations on the document using its URI.
-            }
-        }
-    }
-
     private lateinit var _prefManager: PrefManager
 
     private fun savePosition(uri: Uri)
@@ -244,30 +216,15 @@ class MainActivity : AppCompatActivity()
             fun openDirectory(pickerInitialUri: Uri) {
                 // Choose a directory using the system's file picker.
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                    // Optionally, specify a URI for the directory that should be opened in
-                    // the system file picker when it loads.
                     putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
                 }
 
-                startActivityForResult(intent, 31
-
-                )
+                launcher.launch(intent)
+                //startActivityForResult(intent, 31)
             }
             openDirectory( Uri.parse(""));
 
         })
-
-        val scr = binding.mainStage
-        val observer = scr.viewTreeObserver
-        val listener = object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                scr.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    this@MainActivity.mainWindow = MainWindow(this@MainActivity)
-                }, 20)
-            }
-        }
-        observer.addOnGlobalLayoutListener(listener)
 
         this.setStatusBarColor(Color.argb(55, 0, 0, 11))// Color.TRANSPARENT
         window.navigationBarColor = Color.argb(33, 0, 0, 11)
@@ -275,7 +232,30 @@ class MainActivity : AppCompatActivity()
         //this.hideSystemUI()
         this.setLightStatusBar()
     }
+    private val launcher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+        if (result?.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data: Intent ->
+                //val value = data.getIntExtra(SubActivity.KEY_VALUE, 0)
+                //Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
+            }
+        }
+        result?.data?.also { intent ->
 
+            val pickedDir = DocumentFile.fromTreeUri(this, intent.data!!)
+            if (pickedDir != null) {
+                var a: Array<DocumentFile> = pickedDir.listFiles()
+                for (fil in a) {
+                    //fil.stream
+                    if (true == fil.uri.path?.endsWith(("mp4"))) {
+                        startVideo(fil.uri)
+                        break
+                    }
+                }
+            }
+            // Perform operations on the document using its URI.
+        }
+    }
     private lateinit var loadingView: View
     private var shortAnimationDuration: Int = 31101
 
