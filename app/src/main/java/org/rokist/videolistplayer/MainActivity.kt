@@ -166,12 +166,11 @@ class MainActivity : AppCompatActivity()
     {
         val st = _prefManager.getStringPref("url", "")
         if (st != "") {
-            _currentVideUri = Uri.parse(st)
+            try {
+                _currentVideUri = DocumentFile.fromTreeUri(this, Uri.parse(st))!!.uri
+            } catch(e: Exception) {
 
-            _currentVideUri = DocumentFile.fromTreeUri(this, _currentVideUri!!)!!.uri
-
-            //binding.videoView.setVideoURI(_currentVideUri)
-            //binding.videoView.start()
+            }
         }
     }
 
