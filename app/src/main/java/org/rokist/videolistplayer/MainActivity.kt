@@ -5,12 +5,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.media.MediaPlayer
+import android.media.MediaPlayer.OnCompletionListener
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
@@ -19,7 +21,6 @@ import android.view.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import androidx.documentfile.provider.DocumentFile
 import com.github.kittinunf.fuel.httpGet
@@ -29,23 +30,12 @@ import org.rokist.videolistplayer.databinding.ActivityMainBinding
 
 typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
 
-class ResumeOrPauseList constructor(val context: Context) {
-    val listeners = mutableListOf<OnResumeOrRestartListener>()
-    fun addHandler(listener: OnResumeOrRestartListener) {
-        listeners.add(listener)
-    }
-
-    fun removeHandler(listener: OnResumeOrRestartListener) {
-        listeners.remove(listener)
-    }
-}
-
-
 class MainActivity : AppCompatActivity()
 {
     lateinit var binding: ActivityMainBinding
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean
+    {
         if (event.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
                 KeyEvent.KEYCODE_BACK ->
@@ -64,8 +54,8 @@ class MainActivity : AppCompatActivity()
     {
         super.onResume()
 
-        globalIndex++;
-        val thisSessionIndex = globalIndex;
+        globalIndex++
+        val thisSessionIndex = globalIndex
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         Handler(Looper.myLooper()!!).postDelayed({
             if (globalIndex == thisSessionIndex) {
@@ -74,74 +64,47 @@ class MainActivity : AppCompatActivity()
         }, 1000 * 60 * 30) // 30 min
     }
 
-    var hasFocus = false
-    override fun onWindowFocusChanged(hasFocus: Boolean)
-    {
-        super.onWindowFocusChanged(hasFocus)
-        Log.d("aaa", "focus: ${hasFocus}")
-        this.hasFocus = hasFocus
-        if (hasFocus) {
-        }
-    }
 
-
+    @Suppress("RedundantOverride")
     override fun onConfigurationChanged(newConfig: Configuration)
     {
         super.onConfigurationChanged(newConfig)
     }
 
-    var position = 0;
-    var url: Uri? = null;
+    var position = 0
+    var _currentVideUri: Uri? = null
+
     override fun onRestart() {
         super.onRestart()
-        if (url != null) {
-            binding.videoView.setVideoURI(url)
-            if (position > 0) {
-                binding.videoView.seekTo(position)
-            }
-            binding.videoView.start()
+        if (_currentVideUri == null) {
+            loadVideoUrl()
+        }
+        val uri = _currentVideUri
+        if (uri != null && uri.path != null) {
+            startVideo(uri)
         }
     }
 
     override fun onPause()
     {
         super.onPause()
-//        for (listener in resumeOrPauseList.listeners) {
-//            listener(false)
-//        }
 
-        //sleep(3000)
+        updatePositionToVariable()
+        savePosition()
         binding.videoView.pause()
-        position = binding.videoView.currentPosition
     }
 
     override fun onStart()
     {
         super.onStart()
+        startTimerForUpdatingCurrentPos()
     }
-
-    var a = 23423
-
 
     override fun onNewIntent(intent: Intent?)
     {
         Log.d("aaa", "onNewIntent")
         super.onNewIntent(intent)
     }
-
-    protected fun checkAndRequestRequiredPermissions(permission: String)
-    {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                permission
-            ) !== PackageManager.PERMISSION_GRANTED
-        ) {
-            // Permission is not granted, so request it from user
-            this.requestPermissions(arrayOf(permission), 123)
-        }
-    }
-
-    var isLoad = false
 
     class HttpAccessor
     {
@@ -165,24 +128,105 @@ class MainActivity : AppCompatActivity()
 
     private lateinit var _prefManager: PrefManager
 
-    private fun savePosition(uri: Uri)
+
+    private fun updatePositionToVariable()
     {
-        _prefManager.putInt(uri.path!! + "position", binding.videoView.currentPosition)
+        if (binding.videoView.isPlaying) {
+            val pos = binding.videoView.currentPosition
+            if (pos > 0) {
+                position = pos
+            }
+        }
     }
 
-    private fun saveVideUri(url: String)
+    private fun savePosition()
     {
-        _prefManager.putString("url", url)
+        val uri = _currentVideUri
+        if (uri != null) {
+            _prefManager.putInt(getPositionKey(uri), position)
+        }
+    }
+
+    private fun saveVideUri()
+    {
+        val uri = _currentVideUri
+        if (uri != null) {
+            val str = uri.toString()
+            _prefManager.putString("url", str)
+        }
+    }
+
+    private fun getPositionKey(uri: Uri): String
+    {
+        val pa =  uri.path!! + "_position"
+        return pa
+    }
+
+    private fun loadVideoUrl()
+    {
+        val st = _prefManager.getStringPref("url", "")
+        if (st != "") {
+            _currentVideUri = Uri.parse(st)
+
+            _currentVideUri = DocumentFile.fromTreeUri(this, _currentVideUri!!)!!.uri
+
+            //binding.videoView.setVideoURI(_currentVideUri)
+            //binding.videoView.start()
+        }
     }
 
     private fun startVideo(uri: Uri)
     {
+        val pos = _prefManager.getInt(getPositionKey(uri), 0)
+        if (pos > 0) {
+            position = pos
+        }
+        _currentVideUri = uri
+        saveVideUri()
+
         binding.videoView.setVideoURI((uri))
-        url = uri
-        saveVideUri(uri.path!!)
+
         binding.videoView.start()
+        if (position > 0) {
+            binding.videoView.seekTo(position)
+        }
+        binding.videoView.setOnCompletionListener(object: OnCompletionListener{
+            override fun onCompletion(mediaPlayer: MediaPlayer?) {
+
+            }
+        })
+
+        /*
+        Handler(Looper.myLooper()!!).postDelayed({
+            if (globalIndex == thisSessionIndex) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }, 1000 * 60 * 30) // 30 min
+
+         */
     }
 
+    private var timer: CountDownTimer? = null
+    private fun startTimerForUpdatingCurrentPos() {
+        /*
+        Handler(Looper.myLooper()!!).postDelayed({
+
+            saveCurrentPos()
+        }, 1000 * 60) // 30 min
+        */
+
+        if (timer != null) {
+            timer?.cancel()
+        }
+
+        timer = object: CountDownTimer(10*60*1000, 5000) {
+            override fun onTick(millisUntilFinished: Long) {
+                updatePositionToVariable()
+            }
+            override fun onFinish() {}
+        }
+        timer?.start()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -219,8 +263,7 @@ class MainActivity : AppCompatActivity()
                     putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
                 }
 
-                launcher.launch(intent)
-                //startActivityForResult(intent, 31)
+                videoFolderSelectingLauncher.launch(intent)
             }
             openDirectory( Uri.parse(""));
 
@@ -231,34 +274,40 @@ class MainActivity : AppCompatActivity()
 
         //this.hideSystemUI()
         this.setLightStatusBar()
+
+        if (_currentVideUri == null) {
+            loadVideoUrl()
+        }
+        val uri = _currentVideUri
+        if (uri != null && uri.path != null) {
+            startVideo(uri)
+        }
     }
-    private val launcher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+
+    private val videoFolderSelectingLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult())
+    { result: ActivityResult? ->
         if (result?.resultCode == Activity.RESULT_OK) {
-            result.data?.let { data: Intent ->
+            result.data?.also { intent ->
+                contentResolver.takePersistableUriPermission(
+                    intent.data!!,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
                 //val value = data.getIntExtra(SubActivity.KEY_VALUE, 0)
                 //Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
-            }
-        }
-        result?.data?.also { intent ->
-
-            val pickedDir = DocumentFile.fromTreeUri(this, intent.data!!)
-            if (pickedDir != null) {
-                var a: Array<DocumentFile> = pickedDir.listFiles()
-                for (fil in a) {
-                    //fil.stream
-                    if (true == fil.uri.path?.endsWith(("mp4"))) {
-                        startVideo(fil.uri)
-                        break
+                val pickedDir = DocumentFile.fromTreeUri(this, intent.data!!)
+                if (pickedDir != null) {
+                    val a: Array<DocumentFile> = pickedDir.listFiles()
+                    for (fil in a) {
+                        if (true == fil.uri.path?.endsWith(("mp4"))) {
+                            startVideo(fil.uri)
+                            break
+                        }
                     }
                 }
             }
-            // Perform operations on the document using its URI.
         }
     }
-    private lateinit var loadingView: View
-    private var shortAnimationDuration: Int = 31101
-
 
     private fun setLightStatusBar()
     {
@@ -332,7 +381,8 @@ class MainActivity : AppCompatActivity()
     }
 }
 
-class LockObj {
+class LockObj
+{
 
 }
 
@@ -346,7 +396,8 @@ tailrec fun Context.activity(): MainActivity? = when (this) {
     else -> (this as? ContextWrapper)?.baseContext?.activity()
 }
 
-fun Context.toActivity(): MainActivity {
+fun Context.toActivity(): MainActivity
+{
     var context = this
     while (context is ContextWrapper) {
         if (context is MainActivity) {
