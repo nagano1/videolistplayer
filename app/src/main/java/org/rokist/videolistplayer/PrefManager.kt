@@ -99,9 +99,12 @@ class PrefManager constructor(private var context:Context){
         }
     }
 
-    fun putInt(key: String?, int: Int) {
+    fun getInt(key: String, int: Int): Int {
+        return _sharedPreferences.getInt(key, 0)
+    }
+    fun putInt(key: String?, intVal: Int) {
         val edit = _sharedPreferences.edit()
-        edit?.putInt(key, 0)
+        edit?.putInt(key, intVal)
         edit?.apply()
     }
 
