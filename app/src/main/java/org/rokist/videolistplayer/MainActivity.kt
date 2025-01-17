@@ -32,7 +32,7 @@ typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
 
 class MainActivity : AppCompatActivity()
 {
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean
     {
