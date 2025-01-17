@@ -20,8 +20,7 @@ class CommonGesture {
         private set
     private var _farPoint // 現在のジェスチャー方向の最も奥の値
             = 0f
-    var _directions =
-        ArrayList<Direction?>()
+    var _directions = ArrayList<Direction?>()
     var _currentDirection: Direction? = null
     private var _verticalOriginPoint = 0f
 

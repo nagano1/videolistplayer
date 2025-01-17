@@ -74,7 +74,8 @@ class MainActivity : AppCompatActivity()
     var position = 0
     var _currentVideUri: Uri? = null
 
-    override fun onRestart() {
+    override fun onRestart()
+    {
         super.onRestart()
         if (_currentVideUri == null) {
             loadVideoUrl()
@@ -189,8 +190,9 @@ class MainActivity : AppCompatActivity()
         if (position > 0) {
             binding.videoView.seekTo(position)
         }
-        binding.videoView.setOnCompletionListener(object: OnCompletionListener{
-            override fun onCompletion(mediaPlayer: MediaPlayer?) {
+        binding.videoView.setOnCompletionListener(object: OnCompletionListener {
+            override fun onCompletion(mediaPlayer: MediaPlayer?)
+            {
 
             }
         })
@@ -206,7 +208,8 @@ class MainActivity : AppCompatActivity()
     }
 
     private var timer: CountDownTimer? = null
-    private fun startTimerForUpdatingCurrentPos() {
+    private fun startTimerForUpdatingCurrentPos()
+    {
         /*
         Handler(Looper.myLooper()!!).postDelayed({
 
@@ -219,10 +222,14 @@ class MainActivity : AppCompatActivity()
         }
 
         timer = object: CountDownTimer(10*60*1000, 5000) {
-            override fun onTick(millisUntilFinished: Long) {
+            override fun onTick(millisUntilFinished: Long)
+            {
                 updatePositionToVariable()
             }
-            override fun onFinish() {}
+            override fun onFinish()
+            {
+
+            }
         }
         timer?.start()
     }
@@ -255,7 +262,6 @@ class MainActivity : AppCompatActivity()
             }
         }
         binding.button2.setOnClickListener({ a ->
-
             fun openDirectory(pickerInitialUri: Uri) {
                 // Choose a directory using the system's file picker.
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
@@ -375,7 +381,8 @@ class MainActivity : AppCompatActivity()
         window.statusBarColor = color
     }
 
-    companion object {
+    companion object
+    {
         var abc: Int = 0
     }
 }
