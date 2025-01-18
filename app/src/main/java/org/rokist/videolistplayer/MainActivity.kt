@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity()
     }
 
 
-    lateinit var folderListLoader: FolderListLoader;
+    lateinit var _folderListLoader: FolderListLoader;
     override fun onCreate(savedInstanceState: Bundle?)
     {
         setTheme(R.style.AppTheme)
@@ -254,7 +254,7 @@ class MainActivity : AppCompatActivity()
         }
 
         _prefManager = PrefManager(this)
-        folderListLoader = FolderListLoader(this)
+        _folderListLoader = FolderListLoader(this)
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
 
