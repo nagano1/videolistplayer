@@ -102,6 +102,7 @@ class PrefManager constructor(private var context:Context){
     fun getInt(key: String, int: Int): Int {
         return _sharedPreferences.getInt(key, 0)
     }
+
     fun putInt(key: String?, intVal: Int) {
         val edit = _sharedPreferences.edit()
         edit?.putInt(key, intVal)
@@ -113,6 +114,17 @@ class PrefManager constructor(private var context:Context){
         edit?.putString(key, str)
         edit?.apply()
     }
+
+    fun putStringSet(key: String?, str: Set<String>) {
+        val edit = _sharedPreferences.edit()
+        edit?.putStringSet(key, str)
+        edit?.apply()
+    }
+
+    fun getStringSet(key: String): MutableSet<String>? {
+        return _sharedPreferences.getStringSet(key, null)
+    }
+
 
 
     fun getBooleanPref(string: String?, b: Boolean): Boolean {

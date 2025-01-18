@@ -17,11 +17,16 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
 import android.util.Log
-import android.view.*
+import android.view.KeyEvent
+import android.view.View
+import android.view.WindowManager
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.documentfile.provider.DocumentFile
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
@@ -45,10 +50,12 @@ class MainActivity : AppCompatActivity()
         return super.dispatchKeyEvent(event)
     }
 
-    private val useFullScreen = true;
+    private var _folderList = ArrayList<String>()
+    private val useFullScreen = true
     private val hideNavBar = useFullScreen && false // Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
     private var globalIndex = 0
+
 
     override fun onResume()
     {
@@ -234,6 +241,8 @@ class MainActivity : AppCompatActivity()
         timer?.start()
     }
 
+
+    lateinit var folderListLoader: FolderListLoader;
     override fun onCreate(savedInstanceState: Bundle?)
     {
         setTheme(R.style.AppTheme)
@@ -245,34 +254,13 @@ class MainActivity : AppCompatActivity()
         }
 
         _prefManager = PrefManager(this)
+        folderListLoader = FolderListLoader(this)
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
 
         setContentView(binding.root)
 
-        //crossfade()
-        binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
-            val widthWas = rightWas - leftWas // Right exclusive, left inclusive
-            if (v.width != widthWas) {
-                // Width has changed
-            }
-            val heightWas = bottomWas - topWas // Bottom exclusive, top inclusive
-            if (v.height != heightWas) {
-                // Height has changed
-            }
-        }
-        binding.button2.setOnClickListener({ a ->
-            fun openDirectory(pickerInitialUri: Uri) {
-                // Choose a directory using the system's file picker.
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                    putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-                }
-
-                videoFolderSelectingLauncher.launch(intent)
-            }
-            openDirectory( Uri.parse(""));
-
-        })
+        setupUIs()
 
         this.setStatusBarColor(Color.argb(55, 0, 0, 11))// Color.TRANSPARENT
         window.navigationBarColor = Color.argb(33, 0, 0, 11)
@@ -287,6 +275,35 @@ class MainActivity : AppCompatActivity()
         if (uri != null && uri.path != null) {
             startVideo(uri)
         }
+    }
+
+    private fun setupUIs()
+    {
+        binding.controllerLinearLayout.visibility = View.INVISIBLE
+
+        //crossfade()
+        binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
+            val widthWas = rightWas - leftWas // Right exclusive, left inclusive
+            if (v.width != widthWas) {
+                // Width has changed
+            }
+            val heightWas = bottomWas - topWas // Bottom exclusive, top inclusive
+            if (v.height != heightWas) {
+                // Height has changed
+            }
+        }
+
+        binding.button2.setOnClickListener({ a ->
+            fun openDirectory(pickerInitialUri: Uri) {
+                // Choose a directory using the system's file picker.
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                    putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+                }
+
+                videoFolderSelectingLauncher.launch(intent)
+            }
+            openDirectory(Uri.parse(""));
+        })
     }
 
     private val videoFolderSelectingLauncher = registerForActivityResult(
