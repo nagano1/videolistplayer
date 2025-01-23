@@ -20,6 +20,9 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -84,6 +87,7 @@ class MainActivity : AppCompatActivity()
     override fun onRestart()
     {
         super.onRestart()
+        /*
         if (_currentVideUri == null) {
             loadVideoUrl()
         }
@@ -91,6 +95,7 @@ class MainActivity : AppCompatActivity()
         if (uri != null && uri.path != null) {
             startVideo(uri)
         }
+         */
     }
 
     override fun onPause()
@@ -102,7 +107,8 @@ class MainActivity : AppCompatActivity()
         binding.videoView.pause()
     }
 
-    override fun onStart()
+    public override
+    fun onStart()
     {
         super.onStart()
         startTimerForUpdatingCurrentPos()
@@ -184,6 +190,7 @@ class MainActivity : AppCompatActivity()
 
     private fun startVideo(uri: Uri)
     {
+        return
         val pos = _prefManager.getInt(getPositionKey(uri), 0)
         if (pos > 0) {
             position = pos
@@ -279,7 +286,23 @@ class MainActivity : AppCompatActivity()
 
     private fun setupUIs()
     {
-        binding.controllerLinearLayout.visibility = View.INVISIBLE
+        //binding.controllerLinearLayout.visibility = View.INVISIBLE
+        val folderListView =  binding.folderList
+        val list = ArrayList<String>()
+        list.add("jfiowe")
+        folderListView.adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list)
+        folderListView.onItemClickListener = object: AdapterView.OnItemClickListener{
+            override fun onItemClick(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                binding.controllerLinearLayout.visibility = View.INVISIBLE
+
+                val k = 3
+            }
+        }
 
         //crossfade()
         binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
@@ -295,7 +318,6 @@ class MainActivity : AppCompatActivity()
 
         binding.button2.setOnClickListener({ a ->
             fun openDirectory(pickerInitialUri: Uri) {
-                // Choose a directory using the system's file picker.
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
                     putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
                 }
