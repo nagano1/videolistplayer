@@ -22,7 +22,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListAdapter
+import android.widget.ListView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -284,13 +284,37 @@ class MainActivity : AppCompatActivity()
         }
     }
 
+
+    private fun GoToVideoView()
+    {
+        binding.controllerLinearLayout.visibility = View.INVISIBLE
+    }
+
+    private fun GoToListView()
+    {
+        binding.controllerLinearLayout.visibility = View.VISIBLE
+    }
+
+
     private fun setupUIs()
     {
-        //binding.controllerLinearLayout.visibility = View.INVISIBLE
-        val folderListView =  binding.folderList
-        val list = ArrayList<String>()
-        list.add("jfiowe")
-        folderListView.adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list)
+        // select folder
+        binding.button2.setOnClickListener({ a ->
+            fun openDirectory(pickerInitialUri: Uri) {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                    putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+                }
+
+                videoFolderSelectingLauncher.launch(intent)
+            }
+            openDirectory(Uri.parse(""));
+        })
+
+        val folderListView: ListView =  binding.folderList
+        val list: ArrayList<VideoPlayFolderItem> = ArrayList<VideoPlayFolderItem>()
+        list.add(VideoPlayFolderItem("jfiowe"))
+
+        folderListView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
         folderListView.onItemClickListener = object: AdapterView.OnItemClickListener{
             override fun onItemClick(
                 parent: AdapterView<*>?,
@@ -298,13 +322,10 @@ class MainActivity : AppCompatActivity()
                 position: Int,
                 id: Long
             ) {
-                binding.controllerLinearLayout.visibility = View.INVISIBLE
-
-                val k = 3
+                GoToVideoView()
             }
         }
 
-        //crossfade()
         binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
             val widthWas = rightWas - leftWas // Right exclusive, left inclusive
             if (v.width != widthWas) {
@@ -316,42 +337,43 @@ class MainActivity : AppCompatActivity()
             }
         }
 
-        binding.button2.setOnClickListener({ a ->
-            fun openDirectory(pickerInitialUri: Uri) {
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                    putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-                }
-
-                videoFolderSelectingLauncher.launch(intent)
-            }
-            openDirectory(Uri.parse(""));
-        })
     }
 
-    private val videoFolderSelectingLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult())
+    private val videoFolderSelectingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
     { result: ActivityResult? ->
         if (result?.resultCode == Activity.RESULT_OK) {
             result.data?.also { intent ->
-                contentResolver.takePersistableUriPermission(
-                    intent.data!!,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-                //val value = data.getIntExtra(SubActivity.KEY_VALUE, 0)
-                //Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
-                val pickedDir = DocumentFile.fromTreeUri(this, intent.data!!)
-                if (pickedDir != null) {
-                    val a: Array<DocumentFile> = pickedDir.listFiles()
-                    for (fil in a) {
-                        if (true == fil.uri.path?.endsWith(("mp4"))) {
-                            startVideo(fil.uri)
-                            break
-                        }
-                    }
+                extracted(intent)
+            }
+        }
+    }
+
+    private fun extracted(intent: Intent)
+    {
+        val uri = intent.data
+        if (uri == null) {
+            return
+        }
+
+        contentResolver.takePersistableUriPermission(
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        )
+
+        // val value = data.getIntExtra(SubActivity.KEY_VALUE, 0)
+        // Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
+
+        val pickedDir = DocumentFile.fromTreeUri(this, uri)
+        if (pickedDir != null) {
+            for (fil in pickedDir.listFiles()) {
+                if (true == fil.uri.path?.endsWith(("mp4"))) {
+                    startVideo(fil.uri)
+                    break
                 }
             }
         }
     }
+
 
     private fun setLightStatusBar()
     {

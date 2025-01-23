@@ -47,17 +47,22 @@ class FolderListLoader(context:Context)
     }
 }
 
-class VideoPlayFolderItem
-{
+class VideoPlayFolderItem(s: String) {
     var folderPath: String = ""
     var currentFileName: String = ""
     var index: Int = 0
     var updateTime: Int = 0 // unix timestamp
     var sortTypeNum: Int = 0
 
+    val Title = s
+
     fun outputSaveData() : String
     {
         return folderPath + "|" + currentFileName + "|" + index + "|" + updateTime + "|" + sortTypeNum
+    }
+
+    override fun toString(): String {
+        return Title
     }
 
     companion object
@@ -67,7 +72,7 @@ class VideoPlayFolderItem
             val splitted = savedData.split("|")
             if (splitted.size >= 5) {
                 try {
-                    val newItem = VideoPlayFolderItem()
+                    val newItem = VideoPlayFolderItem("jfiowe")
 
                     newItem.folderPath = splitted[0]
                     newItem.currentFileName = splitted[1]
