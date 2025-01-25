@@ -26,7 +26,6 @@ import android.widget.ListView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -40,6 +39,7 @@ typealias OnResumeOrRestartListener = (resume: Boolean) -> Unit
 
 class MainActivity : AppCompatActivity()
 {
+    private lateinit var _folderList: ArrayList<VideoPlayFolderItem>
     private lateinit var binding: ActivityMainBinding
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean
@@ -52,10 +52,6 @@ class MainActivity : AppCompatActivity()
         }
         return super.dispatchKeyEvent(event)
     }
-
-    private var _folderList = ArrayList<String>()
-    private val useFullScreen = true
-    private val hideNavBar = useFullScreen && false // Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
     private var globalIndex = 0
 
@@ -82,7 +78,8 @@ class MainActivity : AppCompatActivity()
     }
 
     var position = 0
-    var _currentVideUri: Uri? = null
+    var _currentVideUri2: Uri? = null
+    var _currentFolderUri2: Uri? = null
 
     override fun onRestart()
     {
@@ -190,7 +187,6 @@ class MainActivity : AppCompatActivity()
 
     private fun startVideo(uri: Uri)
     {
-        return
         val pos = _prefManager.getInt(getPositionKey(uri), 0)
         if (pos > 0) {
             position = pos
@@ -262,6 +258,7 @@ class MainActivity : AppCompatActivity()
 
         _prefManager = PrefManager(this)
         _folderListLoader = FolderListLoader(this)
+        _folderList  = _folderListLoader.getFolderList()
 
         binding = ActivityMainBinding.inflate(this.layoutInflater)
 
@@ -274,7 +271,7 @@ class MainActivity : AppCompatActivity()
 
         //this.hideSystemUI()
         this.setLightStatusBar()
-
+/*
         if (_currentVideUri == null) {
             loadVideoUrl()
         }
@@ -282,6 +279,7 @@ class MainActivity : AppCompatActivity()
         if (uri != null && uri.path != null) {
             startVideo(uri)
         }
+ */
     }
 
 
@@ -310,21 +308,7 @@ class MainActivity : AppCompatActivity()
             openDirectory(Uri.parse(""));
         })
 
-        val folderListView: ListView =  binding.folderList
-        val list: ArrayList<VideoPlayFolderItem> = ArrayList<VideoPlayFolderItem>()
-        list.add(VideoPlayFolderItem("jfiowe"))
-
-        folderListView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
-        folderListView.onItemClickListener = object: AdapterView.OnItemClickListener{
-            override fun onItemClick(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                GoToVideoView()
-            }
-        }
+        UpdateFolderListView()
 
         binding.mainStage.addOnLayoutChangeListener { v, left, top, right, bottom, leftWas, topWas, rightWas, bottomWas ->
             val widthWas = rightWas - leftWas // Right exclusive, left inclusive
@@ -337,6 +321,30 @@ class MainActivity : AppCompatActivity()
             }
         }
 
+    }
+
+    private fun UpdateFolderListView()
+    {
+        val folderListView: ListView = binding.folderList
+        val list = ArrayList<VideoPlayFolderItem>()
+        for (folderEntry in _folderList) {
+            list.add(folderEntry)
+        }
+
+        folderListView.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
+        folderListView.deferNotifyDataSetChanged()
+        folderListView.onItemClickListener = object : AdapterView.OnItemClickListener {
+            override fun onItemClick(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val l: VideoPlayFolderItem = _folderList[position]
+                startVideo(l.FolderUri)
+                GoToVideoView()
+            }
+        }
     }
 
     private val videoFolderSelectingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
@@ -364,6 +372,10 @@ class MainActivity : AppCompatActivity()
         // Toast.makeText(this, "$value", Toast.LENGTH_LONG).show()
 
         val pickedDir = DocumentFile.fromTreeUri(this, uri)
+        _folderList.add(VideoPlayFolderItem.newFolderEntryFromUri(uri))
+        _folderListLoader.saveFolderList(_folderList)
+
+
         if (pickedDir != null) {
             for (fil in pickedDir.listFiles()) {
                 if (true == fil.uri.path?.endsWith(("mp4"))) {
@@ -382,49 +394,49 @@ class MainActivity : AppCompatActivity()
     }
 
 
-    private fun hideSystemUI()
-    {
-        if (useFullScreen) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-        }
-        WindowInsetsControllerCompat(window, binding.framelayout).let { controller ->
-            if (hideNavBar) {
-                controller.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                controller.hide(WindowInsetsCompat.Type.navigationBars())
-            }
-        }
-
-        ViewCompat
-            .setOnApplyWindowInsetsListener(binding.framelayout) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-                val navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-                /*
-                val v = this.testA.topBottomMargin.value
-                if (v != null) {
-                    v.topMargin = insets.top
-                    if (!hideNavBar) {
-                        v.bottomMargin = navInsets.bottom
-                    }
-                    this.testA.topBottomMargin.postValue(v)
-                }
-                */
-                // Log.d("aaa", "bottom = ${navInsets.bottom}")
-
-                WindowInsetsControllerCompat(window, binding.framelayout).let { controller ->
-                    if (hideNavBar) {
-                        controller.systemBarsBehavior =
-                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                        controller.hide(WindowInsetsCompat.Type.navigationBars())
-                    }
-                }
-
-                // Return CONSUMED if you don't want want the window insets to keep being
-                // passed down to descendant views.
-                WindowInsetsCompat.CONSUMED
-            }
-    }
+//    private fun hideSystemUI()
+//    {
+//        if (useFullScreen) {
+//            WindowCompat.setDecorFitsSystemWindows(window, false)
+//        }
+//        WindowInsetsControllerCompat(window, binding.framelayout).let { controller ->
+//            if (hideNavBar) {
+//                controller.systemBarsBehavior =
+//                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//                controller.hide(WindowInsetsCompat.Type.navigationBars())
+//            }
+//        }
+//
+//        ViewCompat
+//            .setOnApplyWindowInsetsListener(binding.framelayout) { view, windowInsets ->
+//                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+//                val navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+//
+//                /*
+//                val v = this.testA.topBottomMargin.value
+//                if (v != null) {
+//                    v.topMargin = insets.top
+//                    if (!hideNavBar) {
+//                        v.bottomMargin = navInsets.bottom
+//                    }
+//                    this.testA.topBottomMargin.postValue(v)
+//                }
+//                */
+//                // Log.d("aaa", "bottom = ${navInsets.bottom}")
+//
+//                WindowInsetsControllerCompat(window, binding.framelayout).let { controller ->
+//                    //if (hideNavBar) {
+//                        controller.systemBarsBehavior =
+//                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//                        controller.hide(WindowInsetsCompat.Type.navigationBars())
+//                    //}
+//                }
+//
+//                // Return CONSUMED if you don't want want the window insets to keep being
+//                // passed down to descendant views.
+//                WindowInsetsCompat.CONSUMED
+//            }
+//    }
 
 
     private fun showSystemUI()

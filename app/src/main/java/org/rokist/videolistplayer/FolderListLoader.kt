@@ -2,32 +2,29 @@ package org.rokist.videolistplayer
 
 import android.content.Context
 import android.content.SharedPreferences
-import java.util.ArrayList
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
+import java.io.File
 
 class FolderListLoader(context:Context)
 {
     private val _sharedPreferences: SharedPreferences
-
-    init
-    {
-        _sharedPreferences = context.getSharedPreferences("folder_list", Context.MODE_PRIVATE)
-        val list = _sharedPreferences.getStringSet("folderList", null)
-        if (list != null) {
-            for (a: String in list) {
-
-            }
-        }
-    }
-
     private val wfe = "folder_list"
 
-    fun getFolderList(): ArrayList<VideoPlayFolderItem>?
+    private val _context: Context = context
+    init
+    {
+        _sharedPreferences = context.getSharedPreferences("folder_list2", Context.MODE_PRIVATE)
+    }
+
+
+    fun getFolderList(): ArrayList<VideoPlayFolderItem>
     {
         val set = _sharedPreferences.getStringSet(wfe, null)
         if (set == null) {
-            return null
+            return ArrayList()
         }
-        return VideoPlayFolderItem.parseSavedDataList(set)
+        return VideoPlayFolderItem.parseSavedDataList(_context, set)
     }
 
     fun saveFolderList(list: ArrayList<VideoPlayFolderItem>?)
@@ -47,34 +44,57 @@ class FolderListLoader(context:Context)
     }
 }
 
-class VideoPlayFolderItem(s: String) {
-    var folderPath: String = ""
+class VideoPlayFolderItem(folderUri: Uri)
+{
     var currentFileName: String = ""
     var index: Int = 0
     var updateTime: Int = 0 // unix timestamp
     var sortTypeNum: Int = 0
 
-    val Title = s
+    val FolderUri = folderUri
+    val folderPath2 = folderUri.path ?: ""
+
 
     fun outputSaveData() : String
     {
-        return folderPath + "|" + currentFileName + "|" + index + "|" + updateTime + "|" + sortTypeNum
+        return folderPath2 + "|" + currentFileName + "|" + index + "|" + updateTime + "|" + sortTypeNum
     }
 
-    override fun toString(): String {
-        return Title
+    override fun toString(): String
+    {
+        val aFile = File(folderPath2)
+        return aFile.name
     }
 
     companion object
     {
-        fun parseSavedDataEntry(savedData: String) : VideoPlayFolderItem?
+        public
+        fun newFolderEntryFromUri(uri: Uri) : VideoPlayFolderItem
+        {
+            val newItem = VideoPlayFolderItem(uri)
+            try {
+                newItem.currentFileName = ""
+                newItem.updateTime = 0
+                newItem.sortTypeNum = 0
+            }
+            catch(_: Exception) {}
+
+            return newItem
+        }
+
+        fun parseSavedDataEntry(context: Context, savedData: String) : VideoPlayFolderItem?
         {
             val splitted = savedData.split("|")
             if (splitted.size >= 5) {
                 try {
-                    val newItem = VideoPlayFolderItem("jfiowe")
+                    val path = splitted[0]
 
-                    newItem.folderPath = splitted[0]
+                    val folderUri = DocumentFile.fromTreeUri(context, Uri.parse(path))?.uri
+                    if (folderUri == null) {
+                        return null
+                    }
+
+                    val newItem = VideoPlayFolderItem(folderUri)
                     newItem.currentFileName = splitted[1]
                     newItem.index = splitted[2].toInt()
                     newItem.updateTime = splitted[3].toInt()
@@ -87,11 +107,11 @@ class VideoPlayFolderItem(s: String) {
         }
 
 
-        fun parseSavedDataList(strSet: Set<String>) : ArrayList<VideoPlayFolderItem>
+        fun parseSavedDataList(context: Context, strSet: Set<String>) : ArrayList<VideoPlayFolderItem>
         {
             val folderItemList = ArrayList<VideoPlayFolderItem>()
             for (k in strSet) {
-                val folderItem = parseSavedDataEntry(k)
+                val folderItem = parseSavedDataEntry(context, k)
                 if (folderItem != null) {
                     folderItemList.add(folderItem)
                 }
